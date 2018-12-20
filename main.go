@@ -52,12 +52,16 @@ func main() {
 func DeletePerson(c *gin.Context) {
 	id := c.Params.ByName("id")
 	var person Person
-	if err := db.Where("id = ?", id).Delete(&person).Error;err!=nil {
+	affectedRow := db.Where("id = ?", id).Delete(&person).RowsAffected
+	if affectedRow == 0 {
 		c.AbortWithStatus(404)
-		log.Println(err)
+		c.JSON(404, gin.H{"result": "not found"})
 		return
 	}
-	c.JSON(200, gin.H{"id #" + id: "delete"})
+
+	//	c.AbortWithStatus(404)
+
+	c.JSON(200, gin.H{"deletedId": id, "affectedRow": affectedRow})
 }
 
 func UpdatePerson(c *gin.Context) {
@@ -75,7 +79,7 @@ func UpdatePerson(c *gin.Context) {
 
 func CreatePerson(c *gin.Context) {
 	var person Person
-	if err := c.BindJSON(&person); err!=nil {
+	if err := c.BindJSON(&person); err != nil {
 		fmt.Println(err)
 	}
 	db.Create(&person)
