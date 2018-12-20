@@ -60,8 +60,6 @@ func DeletePerson(c *gin.Context) {
 		return
 	}
 
-	//	c.AbortWithStatus(404)
-
 	c.JSON(200, gin.H{"deletedId": id, "affectedRow": affectedRow})
 }
 
@@ -75,6 +73,7 @@ func UpdatePerson(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"code": 404, "result": "not found"})
 		return
 	}
+
 	c.BindJSON(&person)
 	db.Save(&person)
 	c.JSON(200, person)
