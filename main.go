@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"log"
+	"net/http"
 )
 
 var db *gorm.DB
@@ -71,6 +72,8 @@ func UpdatePerson(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&person).Error; err != nil {
 		c.AbortWithStatus(404)
 		log.Println(err)
+		c.JSON(http.StatusNotFound, gin.H{"code": 404, "result": "not found"})
+		return
 	}
 	c.BindJSON(&person)
 	db.Save(&person)
