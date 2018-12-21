@@ -22,8 +22,8 @@ type Person struct {
 func main() {
 	// = not :=
 	var err error
-	db, err = gorm.Open("sqlite3", "./gorm.db")
-	//db, err = gorm.Open("mysql", "zouhl:passw0rd@tcp(192.168.3.149:3306)/blog?charset=utf8&parseTime=True&loc=Local")
+	//db, err = gorm.Open("sqlite3", "./gorm.db")
+	db, err = gorm.Open("mysql", "zouhl:passw0rd@tcp(192.168.3.149:3306)/blog?charset=utf8&parseTime=True&loc=Local")
 
 	if err != nil {
 		panic(err)
@@ -84,7 +84,11 @@ func CreatePerson(c *gin.Context) {
 	if err := c.BindJSON(&person); err != nil {
 		fmt.Println(err)
 	}
-	db.Create(&person)
+	if err := db.Create(&person).Error; err != nil {
+		log.Println("create person err:", err)
+		c.JSON(500, gin.H{"code": 500, "result": err.Error()})
+		return
+	}
 	c.JSON(200, person)
 }
 
