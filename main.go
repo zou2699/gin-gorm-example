@@ -23,7 +23,7 @@ func main() {
 	// = not :=
 	var err error
 	//db, err = gorm.Open("sqlite3", "./gorm.db")
-	db, err = gorm.Open("mysql", "zouhl:passw0rd@tcp(192.168.3.149:3306)/blog?charset=utf8&parseTime=True&loc=Local")
+	db, err = gorm.Open("mysql", "zouhl:passw0rd@tcp(192.168.3.149:3306)/test?charset=utf8&parseTime=True&loc=Local")
 
 	if err != nil {
 		panic(err)
@@ -46,6 +46,15 @@ func main() {
 	router.POST("/people", CreatePerson)
 	router.PUT("/people/:id", UpdatePerson)
 	router.DELETE("/people/:id", DeletePerson)
+
+	// web api
+	router.LoadHTMLGlob("web/*")
+	v1 := router.Group("/web/")
+	{
+		v1.GET("/", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "index.html", gin.H{"title": "Main Website"})
+		})
+	}
 
 	router.Run(":8080")
 }
