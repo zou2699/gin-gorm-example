@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -13,10 +12,10 @@ import (
 var db *gorm.DB
 
 type Person struct {
-	ID       uint   `json:"id"`
-	FistName string `json:"fist_name"`
-	LastName string `json:"last_name"`
-	City     string `json:"city"`
+	ID        uint   `form:"id" json:"id" xml:"id"`
+	FirstName string `form:"first_name" json:"first_name" xml:"first_name" binding:"required"`
+	LastName  string `form:"last_name" json:"last_name" xml:"last_name" binding:"required"`
+	City      string `form:"city" json:"city" xml:"city" binding:"required"`
 }
 
 func main() {
@@ -33,6 +32,8 @@ func main() {
 
 	db.AutoMigrate(&Person{})
 
+	//gin web
+	log.Println(gin.Version)
 	router := gin.Default()
 	//ping for health check
 	router.GET("/ping", func(c *gin.Context) {
@@ -48,15 +49,21 @@ func main() {
 	router.DELETE("/people/:id", DeletePerson)
 
 	// web api
-	router.LoadHTMLGlob("web/*")
+	router.LoadHTMLGlob("templates/**/*")
 	v1 := router.Group("/web/")
 	{
-		v1.GET("/", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "index.html", gin.H{"title": "Main Website"})
+		// get web index
+		v1.GET("/users/index", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "users/index.tmpl", gin.H{"title": "Main Website"})
 		})
+		// post web index
+		v1.GET("posts/index", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "posts/index.tmpl", gin.H{"titile": "Add people"})
+		})
+
 	}
 
-	router.Run(":8080")
+	_ = router.Run(":8080")
 }
 
 func DeletePerson(c *gin.Context) {
@@ -83,19 +90,22 @@ func UpdatePerson(c *gin.Context) {
 		return
 	}
 
-	c.BindJSON(&person)
+	_ = c.BindJSON(&person)
 	db.Save(&person)
 	c.JSON(200, person)
 }
 
 func CreatePerson(c *gin.Context) {
 	var person Person
-	if err := c.BindJSON(&person); err != nil {
-		fmt.Println(err)
+
+	if err := c.ShouldBind(&person); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
+	log.Println(person.FirstName)
 	if err := db.Create(&person).Error; err != nil {
 		log.Println("create person err:", err)
-		c.JSON(500, gin.H{"code": 500, "result": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "result": err.Error()})
 		return
 	}
 	c.JSON(200, person)

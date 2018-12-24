@@ -1,0 +1,47 @@
+{{ define "posts/index.tmpl" }}
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <script>
+        function sub() {
+            $.ajax({
+                cache: true,
+                type: "POST",
+                url: "/people",
+                contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                //dataType: "json",
+                //data:formData,
+                data: $('#formId').serialize(),
+                async: false,
+                success: function () {
+                    alert("success");
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }
+    </script>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            {{ .title }}
+        </title>
+    </head>
+    <body>
+
+    <h2>add people </h2>
+
+    <form id="formId" name="person">
+        Id: <input type="text" name="id"/> <br>
+        first name: <input type="text" name="first_name"/> <br>
+        last name: <input type="text" name="last_name"/> <br>
+        city: <input type="text" name="city"/> <br>
+        <input  type="button" value="提交" onclick="sub()"/>
+    </form>
+
+    </body>
+    </html>
+{{ end }}
