@@ -48,6 +48,11 @@ func main() {
 	router.PUT("/people/:id", UpdatePerson)
 	router.DELETE("/people/:id", DeletePerson)
 
+	//index
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/web/users/index")
+	})
+
 	// web api
 	router.LoadHTMLGlob("templates/**/*")
 	v1 := router.Group("/web/")
